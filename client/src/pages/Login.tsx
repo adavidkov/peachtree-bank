@@ -8,6 +8,8 @@ import {
   Alert,
   Chip,
   Stack,
+  Button,
+  Divider,
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { AccountBalance } from '@mui/icons-material';
@@ -19,7 +21,9 @@ interface LoginProps {
 }
 
 export const Login: React.FC<LoginProps> = ({ onLogin }) => {
+  const [isRegister, setIsRegister] = useState(false);
   const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -30,13 +34,30 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
     setError('');
 
     try {
-      const response = await authAPI.login({ username, password });
-      onLogin(response.user);
-    } catch {
-      setError('Invalid credentials');
+      if (isRegister) {
+        const response = await authAPI.register({ username, email, password });
+        onLogin(response.user);
+      } else {
+        const response = await authAPI.login({ username, password });
+        onLogin(response.user);
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || (isRegister ? 'Registration failed' : 'Invalid credentials'));
     } finally {
       setLoading(false);
     }
+  };
+
+  const resetForm = () => {
+    setUsername('');
+    setEmail('');
+    setPassword('');
+    setError('');
+  };
+
+  const toggleMode = () => {
+    setIsRegister(!isRegister);
+    resetForm();
   };
 
   return (
@@ -58,6 +79,10 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
               Transaction Manager
             </Typography>
             
+            <Typography variant="h6" textAlign="center">
+              {isRegister ? 'Create Account' : 'Sign In'}
+            </Typography>
+            
             <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
               <Stack spacing={2}>
                 <TextField
@@ -68,6 +93,19 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   fullWidth
                   autoFocus
                 />
+                
+                {isRegister && (
+                  <TextField
+                    label="Email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    fullWidth
+                    error={isRegister && email !== '' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)}
+                    helperText={isRegister && email !== '' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? 'Please enter a valid email address' : ''}
+                  />
+                )}
                 
                 <TextField
                   label="Password"
@@ -89,17 +127,29 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   fullWidth
                   size="large"
                 >
-                  Login
+                  {isRegister ? 'Register' : 'Login'}
                 </LoadingButton>
               </Stack>
             </Box>
             
-            <Chip
-              label="Default: admin / 1234"
-              variant="outlined"
-              color="info"
-              size="small"
-            />
+            <Divider sx={{ width: '100%' }} />
+            
+            <Button
+              onClick={toggleMode}
+              variant="text"
+              fullWidth
+            >
+              {isRegister ? 'Already have an account? Sign in' : 'Need an account? Register'}
+            </Button>
+            
+            {!isRegister && (
+              <Chip
+                label="Default: admin / 1234"
+                variant="outlined"
+                color="info"
+                size="small"
+              />
+            )}
           </Stack>
         </CardContent>
       </Card>

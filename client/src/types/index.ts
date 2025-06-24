@@ -10,10 +10,18 @@ export interface Transaction {
 export interface User {
   id: string;
   username: string;
+  email: string;
+  token: string;
 }
 
 export interface LoginData {
   username: string;
+  password: string;
+}
+
+export interface RegisterData {
+  username: string;
+  email: string;
   password: string;
 }
 

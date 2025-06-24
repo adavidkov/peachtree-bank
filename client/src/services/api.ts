@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { LoginData, CreateTransactionData, Transaction, User } from '../types';
+import type { LoginData, RegisterData, CreateTransactionData, Transaction, User } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
 
@@ -10,6 +10,11 @@ const api = axios.create({
 export const authAPI = {
   login: async (credentials: LoginData): Promise<{ user: User }> => {
     const response = await api.post('/login', credentials);
+    return response.data;
+  },
+  
+  register: async (userData: RegisterData): Promise<{ user: User }> => {
+    const response = await api.post('/register', userData);
     return response.data;
   },
 };
